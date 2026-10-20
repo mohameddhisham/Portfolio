@@ -87,6 +87,7 @@ st.set_page_config(
     page_title="Retail Sales Dashboard | Mohamed Hisham",
     page_icon="📈",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 TEAL, INDIGO, AMBER, ROSE, BLUE, VIOLET = (
@@ -105,6 +106,23 @@ div[data-testid="column"]:nth-of-type(2) [data-testid="stMetric"] {border-top-co
 div[data-testid="column"]:nth-of-type(3) [data-testid="stMetric"] {border-top-color:#d97706;}
 div[data-testid="column"]:nth-of-type(4) [data-testid="stMetric"] {border-top-color:#e11d48;}
 h3 {margin-top:.4rem;}
+
+/* ---- Sidebar menu (big and visible) ---- */
+[data-testid="stSidebarNav"] {display:none;}
+[data-testid="stSidebar"] {background:linear-gradient(180deg,#17154a 0%,#0b2a2c 100%);
+        border-right:1px solid rgba(99,102,241,.35);}
+[data-testid="stSidebar"][aria-expanded="true"] {min-width:300px; max-width:300px;}
+.side-title {font-size:.8rem; letter-spacing:.16em; text-transform:uppercase; opacity:.7;
+        margin:.4rem 0 .7rem 0; font-weight:700;}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"],
+[data-testid="stSidebar"] [data-testid="stPageLink"] a {
+        padding:.9rem 1.1rem; margin-bottom:.55rem; border-radius:12px;
+        background:rgba(255,255,255,.07); border:1px solid rgba(99,102,241,.55);}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"] p,
+[data-testid="stSidebar"] [data-testid="stPageLink"] a p {font-size:1.2rem !important; font-weight:700;}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"]:hover,
+[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover {background:rgba(13,148,136,.5);}
+[data-testid="stSidebar"] a[aria-current="page"] {background:#0d9488; border-color:#0d9488;}
 </style>
 """,
     unsafe_allow_html=True,
@@ -148,6 +166,10 @@ min_d, max_d = df["date"].min().date(), df["date"].max().date()
 
 # --- Sidebar filters ----------------------------------------------------------
 with st.sidebar:
+    st.markdown('<div class="side-title">Menu</div>', unsafe_allow_html=True)
+    st.page_link("app.py", label="Portfolio", icon="🏠")
+    st.page_link("pages/1_Sales_Dashboard.py", label="Sales Dashboard", icon="📈")
+    st.divider()
     st.header("Filters")
     picked = st.date_input(
         "Date range",
