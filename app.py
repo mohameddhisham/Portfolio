@@ -128,6 +128,14 @@ EDUCATION = {
     "note": "GPA: 3.41 (Excellent)",
 }
 
+# Dashboard screenshots. Upload each image as <image>.png (or .jpg/.webp) into
+# assets/ — a card only shows up once its image file exists.
+# TODO: set a real title, tools and one-line description for each dashboard.
+GALLERY = [
+    {"title": "Dashboard 1", "tools": [], "desc": "", "color": TEAL, "image": "dashboard1"},
+    {"title": "Dashboard 2", "tools": [], "desc": "", "color": INDIGO, "image": "dashboard2"},
+]
+
 # ----------------------------------------------------------------------------
 # HELPERS
 # ----------------------------------------------------------------------------
@@ -135,6 +143,7 @@ st.set_page_config(
     page_title=f"{NAME} | {TITLE}",
     page_icon="📊",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -153,15 +162,22 @@ def chips(items, color):
     )
 
 
-def photo_uri():
-    """Looks for profile.(jpg|jpeg|png|webp) in assets/ or the repo root."""
+def find_image(stem: str):
+    """Looks for <stem>.(jpg|jpeg|png|webp) in assets/ or the repo root."""
     for folder in (BASE / "assets", BASE):
         for ext in ("jpg", "jpeg", "png", "webp"):
-            p = folder / f"profile.{ext}"
+            p = folder / f"{stem}.{ext}"
             if p.exists():
-                mime = "jpeg" if ext in ("jpg", "jpeg") else ext
-                return f"data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
+                return p
     return None
+
+
+def photo_uri():
+    p = find_image("profile")
+    if not p:
+        return None
+    mime = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else p.suffix.lower().lstrip(".")
+    return f"data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
 
 
 html(
@@ -209,9 +225,33 @@ h2.sec {border-left:6px solid #0d9488; padding:.1rem 0 .1rem .8rem; margin:2rem 
 [data-testid="stLinkButton"], [data-testid="stLinkButton"] a {width:100%;}
 [data-testid="stLinkButton"] a {justify-content:center;}
 a {text-decoration:none;}
+
+/* ---- Sidebar menu (big and visible) ---- */
+[data-testid="stSidebarNav"] {display:none;}
+[data-testid="stSidebar"] {background:linear-gradient(180deg,#17154a 0%,#0b2a2c 100%);
+        border-right:1px solid rgba(99,102,241,.35);}
+[data-testid="stSidebar"][aria-expanded="true"] {min-width:300px; max-width:300px;}
+.side-title {font-size:.8rem; letter-spacing:.16em; text-transform:uppercase; opacity:.7;
+        margin:.4rem 0 .7rem 0; font-weight:700;}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"],
+[data-testid="stSidebar"] [data-testid="stPageLink"] a {
+        padding:.9rem 1.1rem; margin-bottom:.55rem; border-radius:12px;
+        background:rgba(255,255,255,.07); border:1px solid rgba(99,102,241,.55);}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"] p,
+[data-testid="stSidebar"] [data-testid="stPageLink"] a p {font-size:1.2rem !important; font-weight:700;}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"]:hover,
+[data-testid="stSidebar"] [data-testid="stPageLink"] a:hover {background:rgba(13,148,136,.5);}
+[data-testid="stSidebar"] a[aria-current="page"] {background:#0d9488; border-color:#0d9488;}
 </style>
 """
 )
+
+# --- Sidebar menu -----------------------------------------------------------
+with st.sidebar:
+    html('<div class="side-title">Menu</div>')
+    st.page_link("app.py", label="Portfolio", icon="🏠")
+    if (BASE / "pages" / "1_Sales_Dashboard.py").exists():
+        st.page_link("pages/1_Sales_Dashboard.py", label="Sales Dashboard", icon="📈")
 
 # --- Hero -------------------------------------------------------------------
 photo = photo_uri()
@@ -291,6 +331,22 @@ pcols = st.columns(2, gap="large")
 for i, p in enumerate(others):
     with pcols[i % 2]:
         project_card(p)
+
+# --- Dashboards gallery -----------------------------------------------------
+gallery = [(g, find_image(g["image"])) for g in GALLERY]
+gallery = [(g, path) for g, path in gallery if path]
+if gallery:
+    section("Dashboards", TEAL)
+    gcols = st.columns(2, gap="large")
+    for i, (g, path) in enumerate(gallery):
+        with gcols[i % 2]:
+            with st.container(border=True):
+                st.image(str(path))
+                st.subheader(g["title"])
+                if g.get("tools"):
+                    st.markdown(chips(g["tools"], g["color"]), unsafe_allow_html=True)
+                if g.get("desc"):
+                    st.write(g["desc"])
 
 # --- Experience -------------------------------------------------------------
 section("Experience", BLUE)
