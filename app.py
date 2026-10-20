@@ -151,11 +151,12 @@ def chips(items, color):
 
 def photo_uri():
     """Looks for assets/profile.(jpg|jpeg|png|webp) and embeds it. Returns None if absent."""
-    for ext in ("jpg", "jpeg", "png", "webp"):
-        p = BASE / "assets" / f"profile.{ext}"
-        if p.exists():
-            mime = "jpeg" if ext in ("jpg", "jpeg") else ext
-            return f"data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
+    for folder in (BASE / "assets", BASE):
+        for ext in ("jpg", "jpeg", "png", "webp"):
+            p = folder / f"profile.{ext}"
+            if p.exists():
+                mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+                return f"data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
     return None
 
 
@@ -238,7 +239,10 @@ for p in PROJECTS:
         st.markdown(chips(p["stack"], color), unsafe_allow_html=True)
         st.write(p["desc"])
         if p.get("page"):
-            st.page_link(p["page"], label="Open the live dashboard", icon="📈")
+            if (BASE / p["page"]).exists():
+                st.page_link(p["page"], label="Open the live dashboard", icon="📈")
+            else:
+                st.caption("Dashboard page is missing from the repo: pages/1_Sales_Dashboard.py")
         if p.get("link"):
             st.link_button("View project", p["link"])
 
