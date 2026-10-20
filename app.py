@@ -134,7 +134,7 @@ EDUCATION = {
 st.set_page_config(
     page_title=f"{NAME} | {TITLE}",
     page_icon="📊",
-    layout="centered",
+    layout="wide",
 )
 
 
@@ -142,15 +142,19 @@ def html(s: str):
     st.markdown(textwrap.dedent(s).strip(), unsafe_allow_html=True)
 
 
+def section(title: str, color: str):
+    html(f'<h2 class="sec" style="border-left-color:{color}">{title}</h2>')
+
+
 def chips(items, color):
     return "".join(
-        f'<span class="chip" style="border-color:{color};background:{color}26">{i}</span>'
+        f'<span class="chip" style="border-color:{color};background:{color}33">{i}</span>'
         for i in items
     )
 
 
 def photo_uri():
-    """Looks for assets/profile.(jpg|jpeg|png|webp) and embeds it. Returns None if absent."""
+    """Looks for profile.(jpg|jpeg|png|webp) in assets/ or the repo root."""
     for folder in (BASE / "assets", BASE):
         for ext in ("jpg", "jpeg", "png", "webp"):
             p = folder / f"profile.{ext}"
@@ -163,29 +167,47 @@ def photo_uri():
 html(
     """
 <style>
-.block-container {padding-top: 2.5rem; max-width: 860px;}
-.hero {display:flex; align-items:center; gap:1.6rem; flex-wrap:wrap; margin-bottom:.4rem;}
-.avatar {width:132px; height:132px; border-radius:50%; object-fit:cover;
-         border:3px solid #0d9488; box-shadow:0 0 0 5px #4f46e533;}
-.name {font-size:2.6rem; font-weight:800; margin:0; padding:0; line-height:1.1;
-       background:linear-gradient(90deg,#6366f1,#0d9488); -webkit-background-clip:text;
-       background-clip:text; color:transparent;}
-.subtitle {font-size:1.3rem; color:#0d9488; font-weight:600; margin:.3rem 0 .4rem 0;}
-.tagline {font-size:1.05rem; opacity:.85; margin:0;}
+.stApp {
+  background:
+    radial-gradient(900px 520px at 0% 0%, rgba(79,70,229,.38), transparent 60%),
+    radial-gradient(800px 500px at 100% 8%, rgba(13,148,136,.30), transparent 60%),
+    radial-gradient(900px 600px at 50% 100%, rgba(124,58,237,.28), transparent 60%),
+    radial-gradient(700px 500px at 0% 70%, rgba(37,99,235,.18), transparent 60%),
+    #0a0f1a;
+  background-attachment: fixed;
+}
+[data-testid="stHeader"] {background: transparent;}
+.block-container {padding: 2.2rem 4rem 3rem 4rem; max-width: 1400px;}
+@media (max-width: 800px) {.block-container {padding: 1.5rem 1rem;}}
+
+.hero {display:flex; align-items:center; gap:2rem; flex-wrap:wrap; padding:2rem 2.4rem;
+       border-radius:22px; border:1px solid rgba(99,102,241,.45);
+       background:linear-gradient(120deg, rgba(79,70,229,.45), rgba(13,148,136,.35));
+       box-shadow:0 10px 40px rgba(0,0,0,.35); margin-bottom:1rem;}
+.avatar {width:150px; height:150px; border-radius:50%; object-fit:cover;
+         border:4px solid #0d9488; box-shadow:0 0 0 6px rgba(255,255,255,.12);}
+.name {font-size:3rem; font-weight:800; margin:0; padding:0; line-height:1.1; color:#fff;}
+.subtitle {font-size:1.35rem; color:#fff; opacity:.92; font-weight:600; margin:.4rem 0 .5rem 0;}
+.tagline {font-size:1.1rem; color:#fff; opacity:.8; margin:0; max-width:760px;}
+
+h2.sec {border-left:6px solid #0d9488; padding:.1rem 0 .1rem .8rem; margin:2rem 0 1rem 0;
+        font-size:1.7rem;}
 .chip {display:inline-block; padding:3px 12px; margin:3px 4px 3px 0; border-radius:999px;
        border:1px solid; font-size:.85rem; color:#e6edf7;}
 .card {border:1px solid #1f2a44; border-left:5px solid #0d9488; border-radius:14px;
-       padding:1.1rem 1.3rem; margin-bottom:1rem;
-       background:linear-gradient(135deg,#111a2b,#0d1424);}
+       padding:1.2rem 1.4rem; margin-bottom:1rem; height:100%;
+       background:rgba(14,22,40,.78);}
 .card h4 {margin:0 0 .15rem 0;}
 .muted {opacity:.65; font-size:.9rem;}
-.metric {border-top:4px solid; padding-top:.5rem;}
-.metric-num {font-size:2.1rem; font-weight:800; line-height:1.1;}
+.panel {border:1px solid #1f2a44; border-top:4px solid; border-radius:14px;
+        padding:1rem 1.3rem; background:rgba(14,22,40,.78);}
+.metric-num {font-size:2.3rem; font-weight:800; line-height:1.1;}
 .badge {display:inline-block; padding:2px 10px; border-radius:6px; font-size:.75rem;
         font-weight:700; letter-spacing:.03em; color:#fff; margin-bottom:.3rem;}
+[data-testid="stVerticalBlockBorderWrapper"] {background:rgba(14,22,40,.78);
+        border-color:#1f2a44; border-radius:14px;}
 [data-testid="stLinkButton"], [data-testid="stLinkButton"] a {width:100%;}
 [data-testid="stLinkButton"] a {justify-content:center;}
-h2 {border-bottom:2px solid #1f2a44; padding-bottom:.3rem;}
 a {text-decoration:none;}
 </style>
 """
@@ -210,25 +232,39 @@ b2.link_button("💼 LinkedIn", LINKEDIN)
 b3.link_button("🐙 GitHub", GITHUB)
 b4.link_button("✉️ Email me", f"mailto:{EMAIL}")
 
-st.divider()
-
 # --- Metrics ----------------------------------------------------------------
-cols = st.columns(len(METRICS))
+st.write("")
+cols = st.columns(len(METRICS), gap="medium")
 for col, (num, label, color) in zip(cols, METRICS):
     col.markdown(
-        f'<div class="metric" style="border-color:{color}">'
+        f'<div class="panel" style="border-top-color:{color}">'
         f'<div class="metric-num" style="color:{color}">{num}</div>'
         f'<div class="muted">{label}</div></div>',
         unsafe_allow_html=True,
     )
 
-# --- About ------------------------------------------------------------------
-st.header("About")
-st.write(ABOUT)
+# --- About + Education ------------------------------------------------------
+left, right = st.columns([3, 2], gap="large")
+with left:
+    section("About", TEAL)
+    html(f'<div class="card" style="font-size:1.05rem;line-height:1.7">{ABOUT}</div>')
+with right:
+    section("Education", AMBER)
+    html(
+        f"""
+<div class="card" style="border-left-color:{AMBER}">
+<h4>{EDUCATION['school']}</h4>
+<div>{EDUCATION['degree']}</div>
+<div class="muted">{EDUCATION['period']} · {EDUCATION['note']}</div>
+</div>
+"""
+    )
 
 # --- Projects ---------------------------------------------------------------
-st.header("Projects")
-for p in PROJECTS:
+section("Projects", INDIGO)
+
+
+def project_card(p):
     color = p.get("color", TEAL)
     with st.container(border=True):
         if p.get("badge"):
@@ -246,46 +282,60 @@ for p in PROJECTS:
         if p.get("link"):
             st.link_button("View project", p["link"])
 
+
+featured = [p for p in PROJECTS if p.get("badge")]
+others = [p for p in PROJECTS if not p.get("badge")]
+for p in featured:
+    project_card(p)
+pcols = st.columns(2, gap="large")
+for i, p in enumerate(others):
+    with pcols[i % 2]:
+        project_card(p)
+
 # --- Experience -------------------------------------------------------------
-st.header("Experience")
-for job in EXPERIENCE:
+section("Experience", BLUE)
+ecols = st.columns(len(EXPERIENCE), gap="large")
+for col, job in zip(ecols, EXPERIENCE):
     bullets = "".join(f"<li>{pt}</li>" for pt in job["points"])
-    html(
-        f"""
+    with col:
+        html(
+            f"""
 <div class="card" style="border-left-color:{job['color']}">
 <h4>{job['role']} · <span style="color:{job['color']}">{job['company']}</span></h4>
 <div class="muted">{job['period']}</div>
 <ul style="margin-top:.6rem">{bullets}</ul>
 </div>
 """
-    )
+        )
 
 # --- Skills -----------------------------------------------------------------
-st.header("Skills")
-for group, (items, color) in SKILLS.items():
-    st.markdown(f"**{group}**")
-    st.markdown(chips(items, color), unsafe_allow_html=True)
-
-# --- Education --------------------------------------------------------------
-st.header("Education")
-html(
-    f"""
-<div class="card" style="border-left-color:{AMBER}">
-<h4>{EDUCATION['school']}</h4>
-<div>{EDUCATION['degree']}</div>
-<div class="muted">{EDUCATION['period']} · {EDUCATION['note']}</div>
+section("Skills", VIOLET)
+scols = st.columns(2, gap="large")
+for i, (group, (items, color)) in enumerate(SKILLS.items()):
+    with scols[i % 2]:
+        html(
+            f"""
+<div class="card" style="border-left-color:{color}">
+<b>{group}</b><br>{chips(items, color)}
 </div>
 """
-)
+        )
 
 # --- Contact ----------------------------------------------------------------
-st.header("Contact")
-st.markdown(
-    f"""
-- 📧 [{EMAIL}](mailto:{EMAIL})
-- 📞 {" / ".join(PHONES)}
-- 💼 [LinkedIn]({LINKEDIN})
-- 🐙 [GitHub]({GITHUB})
-"""
-)
+section("Contact", ROSE)
+contacts = [
+    ("Email", f'<a href="mailto:{EMAIL}">{EMAIL}</a>', TEAL),
+    ("Phone", " / ".join(PHONES), AMBER),
+    ("LinkedIn", f'<a href="{LINKEDIN}">mohamed-hisham-ibrahim</a>', BLUE),
+    ("GitHub", f'<a href="{GITHUB}">mohameddhisham</a>', INDIGO),
+]
+ccols = st.columns(4, gap="medium")
+for col, (label, value, color) in zip(ccols, contacts):
+    col.markdown(
+        f'<div class="panel" style="border-top-color:{color}">'
+        f'<div class="muted">{label}</div><div>{value}</div></div>',
+        unsafe_allow_html=True,
+    )
+
+st.write("")
 st.caption(f"© {NAME} · Built with Python & Streamlit")
