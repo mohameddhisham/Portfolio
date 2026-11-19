@@ -1,4 +1,4 @@
-/* Shared behaviour: mobile menu, optional images (profile + dashboard screenshots), lightbox. */
+/* Shared behaviour: mobile menu, active menu item while scrolling, optional images, lightbox. */
 (function () {
   'use strict';
 
@@ -12,9 +12,33 @@
     a.addEventListener('click', function () { setNav(false); });
   });
 
+  // ---- Highlight the menu item of the section being read -------------------
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav a[href^="#"]'));
+  function setActive(id) {
+    links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+  }
+  if ('IntersectionObserver' in window) {
+    var visible = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+      var order = links.map(function (a) { return a.getAttribute('href').slice(1); });
+      for (var i = 0; i < order.length; i++) {
+        if (visible[order[i]]) { setActive(order[i]); return; }
+      }
+    }, { rootMargin: '-15% 0px -60% 0px' });
+    function observeAll() {
+      links.forEach(function (a) {
+        var el = document.getElementById(a.getAttribute('href').slice(1));
+        if (el) io.observe(el);
+      });
+    }
+    observeAll();
+  }
+  if (links.length) setActive(links[0].getAttribute('href').slice(1));
+
   // ---- Optional images ----------------------------------------------------
-  // <img data-img="profile"> looks for assets/profile.(png|jpg|jpeg|webp), then the same names in the
-  // site root. If nothing is found the element is hidden (or its card removed when data-card is set).
+  // <img data-img="profile"> looks for assets/profile.(jpg|png|jpeg|webp), then the same names in the
+  // site root. If nothing is found the element is hidden (or its card removed when inside [data-card]).
   var EXT = ['jpg', 'png', 'jpeg', 'webp'];
   function candidates(stem) {
     var out = [];
@@ -48,7 +72,7 @@
       }
     });
   })).then(function () {
-    // Remove the whole gallery section (and its menu link) when no screenshot was found.
+    // No screenshots found: remove the whole gallery section and its menu link.
     var gallery = document.getElementById('dashboards');
     if (gallery && !gallery.querySelector('[data-card]')) {
       gallery.remove();

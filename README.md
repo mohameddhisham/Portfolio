@@ -8,10 +8,8 @@ Static site (HTML / CSS / JavaScript). No build step and no dependencies, so it 
 
 ```
 index.html            main portfolio page
-dashboard.html        interactive Sales Dashboard (synthetic data)
 css/style.css         all styles and colors (see :root)
 js/site.js            menu, photo and screenshot loading
-js/dashboard.js       dashboard data + charts
 assets/               put your images here (see below)
 ```
 
