@@ -1,5 +1,7 @@
 # Mohamed Hisham Ibrahim — Data Analyst Portfolio
 
+Live site: https://portfolio-sigma-navy-21.vercel.app
+
 Static site (HTML / CSS / JavaScript). No build step and no dependencies, so it loads instantly on Vercel.
 
 ## Structure
